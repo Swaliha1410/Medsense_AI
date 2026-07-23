@@ -72,7 +72,7 @@ const AnimatedBackground = () => {
         <line x1="50%" y1="25%" x2="72%" y2="55%" stroke="url(#lineGrad)" strokeWidth="0.8" />
         <line x1="48%" y1="50%" x2="70%" y2="30%" stroke="url(#lineGrad)" strokeWidth="0.8" />
         <line x1="48%" y1="50%" x2="72%" y2="55%" stroke="url(#lineGrad)" strokeWidth="0.8" />
-        <line x1="48%" y1="50%" x2="68%" y1="75%" stroke="url(#lineGrad)" strokeWidth="0.8" />
+        <line x1="48%" y1="50%" x2="68%" y2="75%" stroke="url(#lineGrad)" strokeWidth="0.8" />
         <line x1="45%" y1="70%" x2="72%" y2="55%" stroke="url(#lineGrad)" strokeWidth="0.8" />
         <line x1="45%" y1="70%" x2="68%" y2="75%" stroke="url(#lineGrad)" strokeWidth="0.8" />
         

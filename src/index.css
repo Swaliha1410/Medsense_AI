@@ -17,6 +17,32 @@ body {
   background: #F8FAFC;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Smooth Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 @layer utilities {
   .glassmorphism {
     background: rgba(255, 255, 255, 0.7);
@@ -31,4 +57,9 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+}
+
+/* Auto-resize textarea */
+textarea {
+  field-sizing: content;
 }
