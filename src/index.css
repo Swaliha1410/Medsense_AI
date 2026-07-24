@@ -63,3 +63,21 @@ body {
 textarea {
   field-sizing: content;
 }
+
+/* Custom Scrollbar for Hospital List */
+.styled-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 10px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
