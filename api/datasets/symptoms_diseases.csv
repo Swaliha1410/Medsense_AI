@@ -1,0 +1,143 @@
+disease,symptoms,severity,category,icd_code
+Common Cold,"runny nose,sneezing,sore throat,mild fever,congestion,cough,watery eyes",mild,Respiratory,J00
+Influenza (Flu),"high fever,body aches,fatigue,headache,chills,sore throat,cough,runny nose,vomiting",moderate,Respiratory,J11.1
+COVID-19,"fever,dry cough,fatigue,loss of taste,loss of smell,shortness of breath,body aches,headache,sore throat,diarrhea",moderate,Respiratory,U07.1
+Pneumonia,"high fever,chills,cough with phlegm,chest pain,shortness of breath,fatigue,nausea,rapid breathing",severe,Respiratory,J18.9
+Bronchitis,"persistent cough,mucus production,fatigue,shortness of breath,mild fever,chest discomfort,wheezing",moderate,Respiratory,J40
+Asthma,"wheezing,shortness of breath,chest tightness,coughing at night,difficulty breathing,breathlessness on exertion",moderate,Respiratory,J45.9
+Allergic Rhinitis,"sneezing,runny nose,itchy eyes,nasal congestion,watery eyes,itchy nose,postnasal drip",mild,Allergy,J30.1
+Sinusitis,"facial pain,nasal congestion,thick nasal discharge,headache,loss of smell,cough,fever,toothache",moderate,Respiratory,J32.9
+Tonsillitis,"sore throat,swollen tonsils,fever,difficulty swallowing,swollen lymph nodes,bad breath,muffled voice",moderate,ENT,J35.0
+Strep Throat,"severe sore throat,fever,swollen lymph nodes,difficulty swallowing,red tonsils,white patches on throat,headache",moderate,ENT,J02.0
+Hypertension,"headache,dizziness,blurred vision,chest pain,shortness of breath,nosebleed,palpitations,fatigue",moderate,Cardiovascular,I10
+Heart Attack,"chest pain,chest tightness,pain radiating to arm,shortness of breath,sweating,nausea,dizziness,jaw pain,back pain",critical,Cardiovascular,I21.9
+Angina,"chest pain on exertion,shortness of breath,fatigue,dizziness,nausea,sweating",moderate,Cardiovascular,I20.9
+Arrhythmia,"palpitations,rapid heartbeat,slow heartbeat,dizziness,shortness of breath,chest discomfort,fainting",moderate,Cardiovascular,I49.9
+Heart Failure,"shortness of breath,fatigue,swollen ankles,rapid heartbeat,persistent cough,reduced ability to exercise,wheezing",severe,Cardiovascular,I50.9
+Type 2 Diabetes,"frequent urination,excessive thirst,unexplained weight loss,fatigue,blurry vision,slow healing wounds,frequent infections,numbness in hands or feet",moderate,Endocrine,E11.9
+Type 1 Diabetes,"frequent urination,excessive thirst,rapid weight loss,fatigue,extreme hunger,blurry vision,irritability,bed-wetting in children",severe,Endocrine,E10.9
+Hypoglycemia,"shakiness,sweating,hunger,dizziness,confusion,rapid heartbeat,pale skin,irritability,headache",moderate,Endocrine,E16.0
+Hypothyroidism,"fatigue,weight gain,cold intolerance,constipation,dry skin,hair loss,slow heart rate,depression,memory problems",moderate,Endocrine,E03.9
+Hyperthyroidism,"weight loss,rapid heartbeat,increased appetite,nervousness,tremors,sweating,heat intolerance,fatigue,frequent bowel movements",moderate,Endocrine,E05.9
+Gastritis,"stomach pain,nausea,vomiting,bloating,indigestion,loss of appetite,burning sensation in stomach",moderate,Gastrointestinal,K29.7
+Peptic Ulcer,"burning stomach pain,nausea,vomiting,bloating,dark stools,weight loss,vomiting blood",moderate,Gastrointestinal,K27.9
+GERD,"heartburn,acid reflux,chest pain,regurgitation,difficulty swallowing,chronic cough,sore throat",moderate,Gastrointestinal,K21.0
+Irritable Bowel Syndrome,"abdominal cramping,bloating,diarrhea,constipation,gas,mucus in stool,abdominal pain after eating",mild,Gastrointestinal,K58.9
+Appendicitis,"severe abdominal pain,pain starting around navel moving to right lower abdomen,nausea,vomiting,fever,loss of appetite,rigid abdomen",critical,Gastrointestinal,K37
+Cholecystitis,"right upper abdominal pain,fever,nausea,vomiting,pain after fatty foods,jaundice,clay-colored stools",severe,Gastrointestinal,K81.0
+Pancreatitis,"severe upper abdominal pain,pain radiating to back,nausea,vomiting,fever,rapid pulse,tender abdomen",severe,Gastrointestinal,K85.9
+Crohn's Disease,"abdominal pain,diarrhea,fatigue,weight loss,blood in stool,reduced appetite,fever,mouth sores",moderate,Gastrointestinal,K50.9
+Celiac Disease,"diarrhea,bloating,gas,fatigue,weight loss,anemia,bone pain,headache,skin rash",moderate,Gastrointestinal,K90.0
+Migraine,"severe headache,throbbing pain,nausea,vomiting,sensitivity to light,sensitivity to sound,visual aura,dizziness",moderate,Neurological,G43.9
+Tension Headache,"mild to moderate headache,pressure around forehead,neck pain,shoulder tension,sensitivity to light,fatigue",mild,Neurological,G44.2
+Stroke,"sudden numbness,facial drooping,arm weakness,speech difficulty,severe headache,vision problems,loss of balance,confusion",critical,Neurological,I63.9
+Epilepsy,"seizures,convulsions,temporary confusion,staring spells,uncontrollable jerking,loss of consciousness,fear,anxiety",severe,Neurological,G40.9
+Meningitis,"severe headache,high fever,stiff neck,sensitivity to light,nausea,vomiting,altered consciousness,skin rash",critical,Neurological,G03.9
+Multiple Sclerosis,"fatigue,numbness,tingling,vision problems,weakness,coordination problems,balance issues,cognitive difficulties",severe,Neurological,G35
+Parkinson's Disease,"tremors at rest,rigid muscles,slowed movement,impaired posture,speech changes,writing changes,balance problems",severe,Neurological,G20
+Alzheimer's Disease,"memory loss,confusion,difficulty with familiar tasks,language problems,disorientation,mood changes,personality changes",severe,Neurological,G30.9
+Urinary Tract Infection,"burning urination,frequent urination,cloudy urine,strong-smelling urine,pelvic pain,blood in urine,lower back pain",moderate,Urological,N39.0
+Kidney Stones,"severe flank pain,pain radiating to groin,blood in urine,nausea,vomiting,frequent urination,painful urination,fever",severe,Urological,N20.0
+Kidney Disease,"fatigue,swelling in ankles,shortness of breath,decreased urine output,nausea,confusion,high blood pressure,anemia",severe,Urological,N18.9
+Prostate Issues,"frequent urination at night,weak urine flow,difficulty starting urination,dribbling after urination,blood in urine,pelvic pain",moderate,Urological,N40.0
+Depression,"persistent sadness,loss of interest,fatigue,sleep problems,appetite changes,difficulty concentrating,feelings of worthlessness,thoughts of self-harm",moderate,Mental Health,F32.9
+Anxiety Disorder,"excessive worry,restlessness,fatigue,difficulty concentrating,muscle tension,sleep problems,rapid heartbeat,sweating,trembling",moderate,Mental Health,F41.9
+Panic Attacks,"sudden intense fear,palpitations,chest pain,shortness of breath,dizziness,trembling,sweating,nausea,numbness,fear of dying",moderate,Mental Health,F41.0
+PTSD,"flashbacks,nightmares,severe anxiety,intrusive thoughts,emotional numbness,sleep disturbances,irritability,hypervigilance",severe,Mental Health,F43.1
+Bipolar Disorder,"extreme mood swings,mania,depression,decreased need for sleep,racing thoughts,impulsive behavior,fatigue",severe,Mental Health,F31.9
+Anemia,"fatigue,weakness,pale skin,shortness of breath,dizziness,cold hands and feet,brittle nails,chest pain,headache",moderate,Hematological,D64.9
+Dengue Fever,"high fever,severe headache,pain behind eyes,joint pain,muscle pain,skin rash,nausea,vomiting,mild bleeding",severe,Infectious,A90
+Malaria,"cyclical fever,chills,sweating,headache,nausea,vomiting,muscle pain,fatigue,anemia",severe,Infectious,B54
+Typhoid Fever,"prolonged fever,headache,abdominal pain,diarrhea or constipation,rose spots on skin,weakness,loss of appetite",severe,Infectious,A01.0
+Hepatitis A,"fatigue,nausea,vomiting,abdominal pain,jaundice,dark urine,clay-colored stools,loss of appetite,fever",moderate,Infectious,B15.9
+Hepatitis B,"fatigue,nausea,vomiting,abdominal pain,jaundice,dark urine,joint pain,fever,loss of appetite",severe,Infectious,B18.1
+Hepatitis C,"fatigue,jaundice,dark urine,abdominal pain,nausea,joint pain,easy bruising,spider veins",severe,Infectious,B18.2
+Tuberculosis,"persistent cough,coughing blood,chest pain,fatigue,fever,night sweats,weight loss,loss of appetite",severe,Infectious,A15.0
+HIV/AIDS,"flu-like symptoms,fatigue,swollen lymph nodes,fever,sore throat,rash,night sweats,weight loss,recurrent infections",severe,Infectious,B24
+Eczema,"itchy skin,red rash,dry skin,skin inflammation,blisters,scaling,cracked skin,swelling",mild,Dermatological,L20.9
+Psoriasis,"red patches,silver scales,dry cracked skin,itching,burning,soreness,thickened nails,joint swelling",moderate,Dermatological,L40.9
+Urticaria (Hives),"raised itchy welts,redness,swelling,burning sensation,varying size bumps,skin rash",mild,Dermatological,L50.9
+Acne,"pimples,blackheads,whiteheads,cysts,nodules,oily skin,scarring",mild,Dermatological,L70.0
+Cellulitis,"red skin,warmth,swelling,tenderness,fever,pain,skin tightness,blisters",moderate,Dermatological,L03.9
+Rheumatoid Arthritis,"joint pain,joint swelling,morning stiffness,fatigue,fever,loss of appetite,deformity",moderate,Musculoskeletal,M06.9
+Osteoarthritis,"joint pain,stiffness,tenderness,loss of flexibility,grating sensation,bone spurs,swelling",moderate,Musculoskeletal,M19.9
+Gout,"sudden severe joint pain,swelling,redness,warmth in joint,tenderness,limited motion,usually in big toe",severe,Musculoskeletal,M10.9
+Back Pain,"lower back pain,muscle ache,shooting pain,limited flexibility,inability to stand straight,pain radiating to leg",moderate,Musculoskeletal,M54.5
+Fibromyalgia,"widespread pain,fatigue,sleep problems,cognitive difficulties,headache,irritable bowel,depression,anxiety,tenderness",moderate,Musculoskeletal,M79.7
+Lupus,"butterfly rash,fatigue,joint pain,fever,chest pain,hair loss,sensitivity to sunlight,kidney problems,mouth sores",severe,Autoimmune,M32.9
+Celiac Disease,"diarrhea,abdominal pain,bloating,weight loss,anemia,fatigue,bone pain,depression,skin rash",moderate,Autoimmune,K90.0
+Conjunctivitis,"red eyes,itchy eyes,discharge,tearing,swollen eyelids,burning sensation,sensitivity to light",mild,Ophthalmological,H10.9
+Glaucoma,"gradual vision loss,eye pain,blurred vision,halos around lights,nausea,vomiting",severe,Ophthalmological,H40.9
+Cataracts,"cloudy vision,blurry vision,faded colors,glare sensitivity,poor night vision,double vision",moderate,Ophthalmological,H26.9
+Otitis Media,"ear pain,fluid drainage,hearing loss,fever,fussiness in children,balance problems",moderate,ENT,H66.9
+Vertigo,"dizziness,spinning sensation,balance problems,nausea,vomiting,abnormal eye movements,hearing loss",moderate,ENT,H81.1
+Polycystic Ovary Syndrome,"irregular periods,excess androgen,polycystic ovaries,weight gain,acne,hair growth,hair thinning,infertility",moderate,Reproductive,E28.2
+Endometriosis,"pelvic pain,painful periods,pain during intercourse,infertility,heavy periods,fatigue,bloating,nausea",severe,Reproductive,N80.9
+Preeclampsia,"high blood pressure,protein in urine,headache,vision changes,upper abdominal pain,nausea,sudden weight gain,swelling",critical,Reproductive,O14.9
+Thyroid Nodule,"lump in neck,difficulty swallowing,hoarseness,pain in neck,swollen lymph nodes",moderate,Endocrine,E04.1
+Vitamin D Deficiency,"fatigue,bone pain,muscle weakness,depression,hair loss,slow wound healing,back pain",mild,Nutritional,E55.9
+Iron Deficiency Anemia,"fatigue,weakness,pale skin,cold hands,brittle nails,shortness of breath,dizziness,chest pain,headache,cravings for ice",moderate,Nutritional,D50.9
+Dehydration,"thirst,dry mouth,dark urine,fatigue,dizziness,confusion,headache,rapid heartbeat,sunken eyes",moderate,General,E86.0
+Heatstroke,"high body temperature,hot dry skin,rapid heartbeat,confusion,slurred speech,nausea,unconsciousness",critical,General,T67.0
+Food Poisoning,"nausea,vomiting,diarrhea,stomach cramps,fever,muscle aches,headache",moderate,Gastrointestinal,A05.9
+Chickenpox,"itchy rash,red spots,blisters,fever,headache,fatigue,loss of appetite,sore throat",mild,Infectious,B01.9
+Measles,"high fever,runny nose,cough,red eyes,skin rash,white spots in mouth,sensitivity to light",moderate,Infectious,B05.9
+Mumps,"swollen jaw,swollen salivary glands,fever,headache,muscle aches,fatigue,loss of appetite,difficulty chewing",moderate,Infectious,B26.9
+Typhoid Fever,"sustained high fever,weakness,stomach pain,headache,loss of appetite,constipation,diarrhea,rash with rose spots",moderate,Infectious,A01.0
+Hepatitis A,"jaundice,fatigue,abdominal pain,nausea,loss of appetite,dark urine,pale stool,low-grade fever",moderate,Gastrointestinal,B15.9
+Hepatitis B,"jaundice,fatigue,abdominal pain,nausea,vomiting,dark urine,joint pain,loss of appetite",moderate,Gastrointestinal,B18.1
+Hepatitis C,"fatigue,nausea,abdominal pain,dark urine,jaundice,joint pain,loss of appetite",moderate,Gastrointestinal,B18.2
+Liver Cirrhosis,"fatigue,jaundice,swollen abdomen,weight loss,easy bruising,itchy skin,nausea,leg swelling,confusion",severe,Gastrointestinal,K74.6
+Fatty Liver Disease,"fatigue,abdominal discomfort,weight gain,abdominal swelling,weakness,loss of appetite",mild,Gastrointestinal,K76.0
+Gallstones,"severe abdominal pain,pain in right upper abdomen,nausea,vomiting,fever,jaundice,clay-colored stools",moderate,Gastrointestinal,K80.20
+Hemorrhoids,"rectal bleeding,itching around anus,pain during bowel movement,swelling around anus,discomfort when sitting",mild,Gastrointestinal,K64.9
+Constipation,"infrequent bowel movements,hard stools,straining,bloating,abdominal discomfort,feeling of incomplete evacuation",mild,Gastrointestinal,K59.0
+Diarrhea,"loose watery stools,abdominal cramps,nausea,bloating,urgency to pass stool,dehydration,fever",mild,Gastrointestinal,A09
+Stroke,"sudden numbness,face drooping,arm weakness,slurred speech,severe headache,loss of balance,vision problems,confusion",critical,Neurological,I64
+Parkinson's Disease,"tremor at rest,stiff muscles,slow movement,impaired balance,soft speech,stooped posture,shuffling gait",moderate,Neurological,G20
+Alzheimer's Disease,"memory loss,confusion,difficulty with language,disorientation,mood swings,personality changes,difficulty completing tasks",moderate,Neurological,G30.9
+Multiple Sclerosis,"fatigue,difficulty walking,numbness,tingling,muscle weakness,blurred vision,dizziness,bladder problems",moderate,Neurological,G35
+Meningitis,"severe headache,stiff neck,high fever,sensitivity to light,nausea,vomiting,rash,altered consciousness",critical,Neurological,G03.9
+Bell's Palsy,"sudden facial weakness,drooping of one side of face,difficulty closing eye,drooling,loss of taste,pain around ear",moderate,Neurological,G51.0
+Vertigo,"dizziness,spinning sensation,loss of balance,nausea,vomiting,difficulty walking,ringing in ears",moderate,ENT,H81.1
+Tinnitus,"ringing in ears,buzzing,hissing,clicking sound in ear,difficulty concentrating,sleep disturbance",mild,ENT,H93.1
+Otitis Media,"ear pain,fever,hearing loss,fluid from ear,irritability,tugging at ear,difficulty sleeping",moderate,ENT,H66.9
+Cataracts,"cloudy vision,blurred vision,difficulty seeing at night,sensitivity to light,seeing halos,faded colors",mild,Ophthalmology,H26.9
+Glaucoma,"gradual peripheral vision loss,eye pain,headache,blurred vision,nausea,halos around lights",moderate,Ophthalmology,H40.9
+Eczema,"itchy skin,red patches,dry skin,scaling,blisters,skin thickening,oozing lesions,inflammation",mild,Dermatology,L20.9
+Fungal Infection,"itching,red rash,scaling,burning sensation,cracked skin,white patches,nail discoloration,bad odor",mild,Dermatology,B35.9
+Scabies,"intense itching at night,thin burrow lines on skin,rash,sores from scratching,pimple-like rash,rash between fingers",mild,Dermatology,B86
+Shingles,"painful rash,blisters,burning pain,itching,sensitivity to touch,fever,headache,fatigue",moderate,Dermatology,B02.9
+Acne,"pimples,blackheads,whiteheads,oily skin,scarring,redness,swelling,painful bumps",mild,Dermatology,L70.0
+Kidney Failure,"decreased urine output,swelling in legs,fatigue,shortness of breath,confusion,nausea,chest pain,high blood pressure",severe,Renal,N19
+Urinary Incontinence,"involuntary urine leakage,frequent urination,urgency to urinate,leaking urine when coughing or sneezing",mild,Renal,R32
+Prostate Enlargement,"frequent urination,weak urine stream,difficulty starting urination,incomplete bladder emptying,waking at night to urinate",moderate,Urology,N40
+Erectile Dysfunction,"difficulty achieving erection,reduced sexual desire,trouble maintaining erection,anxiety about sexual performance",mild,Urology,N52.9
+Polycystic Ovary Syndrome,"irregular periods,excess hair growth,acne,obesity,thinning hair,fertility problems,darkening of skin",moderate,Gynecology,E28.2
+Endometriosis,"painful periods,pelvic pain,pain during intercourse,heavy periods,infertility,painful bowel movements,fatigue",moderate,Gynecology,N80.9
+Menopause,"hot flashes,night sweats,irregular periods,mood swings,vaginal dryness,sleep disturbance,weight gain",mild,Gynecology,N95.1
+Preeclampsia,"high blood pressure in pregnancy,protein in urine,severe headache,vision changes,upper abdominal pain,swelling of face and hands",severe,Obstetrics,O14.9
+Gestational Diabetes,"high blood sugar in pregnancy,excessive thirst,frequent urination,fatigue,blurred vision,nausea",moderate,Obstetrics,O24.9
+Osteoporosis,"back pain,loss of height,stooped posture,bone fractures from minor falls,brittle nails,decreased grip strength",moderate,Orthopedic,M81.0
+Osteoarthritis,"joint pain,stiffness after rest,reduced range of motion,swelling,grating sensation in joints,bone spurs",moderate,Orthopedic,M19.9
+Fibromyalgia,"widespread muscle pain,fatigue,sleep problems,cognitive difficulties,headaches,irritable bowel,depression,anxiety",moderate,Rheumatology,M79.7
+Lupus,"butterfly-shaped facial rash,fatigue,joint pain,fever,sensitivity to sunlight,hair loss,chest pain,kidney problems",moderate,Rheumatology,M32.9
+Sickle Cell Disease,"episodes of pain,fatigue,swollen hands and feet,frequent infections,delayed growth,vision problems,anemia",severe,Hematology,D57.1
+Leukemia,"fatigue,frequent infections,easy bruising,bone pain,weight loss,swollen lymph nodes,night sweats,bleeding",severe,Oncology,C95.9
+Lymphoma,"swollen lymph nodes,fever,night sweats,weight loss,fatigue,itchy skin,chest pain,cough",severe,Oncology,C85.9
+Breast Cancer,"breast lump,changes in breast size,skin dimpling,nipple discharge,nipple inversion,breast pain,swollen lymph nodes",severe,Oncology,C50.9
+Lung Cancer,"persistent cough,coughing blood,chest pain,shortness of breath,wheezing,weight loss,hoarseness,bone pain",severe,Oncology,C34.9
+Colorectal Cancer,"change in bowel habits,blood in stool,abdominal pain,weight loss,fatigue,narrow stools,incomplete bowel emptying",severe,Oncology,C20
+Thyroid Cancer,"neck lump,difficulty swallowing,hoarseness,swollen lymph nodes,throat pain,persistent cough",moderate,Oncology,C73
+Obsessive Compulsive Disorder,"intrusive thoughts,compulsive rituals,repetitive behaviors,anxiety,fear of contamination,need for symmetry,excessive checking",moderate,Psychiatry,F42.9
+Post-Traumatic Stress Disorder,"flashbacks,nightmares,severe anxiety,avoidance of triggers,emotional numbness,sleep disturbance,hypervigilance",moderate,Psychiatry,F43.1
+Bipolar Disorder,"mood swings,periods of mania,periods of depression,impulsive behavior,decreased need for sleep,racing thoughts,inflated self-esteem",moderate,Psychiatry,F31.9
+Schizophrenia,"hallucinations,delusions,disorganized thinking,flat affect,social withdrawal,cognitive impairment,lack of motivation",severe,Psychiatry,F20.9
+Attention Deficit Hyperactivity Disorder,"inattention,hyperactivity,impulsivity,difficulty focusing,forgetfulness,losing things,fidgeting,interrupting others",mild,Psychiatry,F90.9
+Sleep Apnea,"loud snoring,gasping during sleep,morning headache,excessive daytime sleepiness,dry mouth,insomnia,difficulty concentrating",moderate,Sleep,G47.3
+Insomnia,"difficulty falling asleep,waking at night,waking too early,daytime fatigue,irritability,difficulty concentrating,depression",moderate,Sleep,G47.0
+Chronic Fatigue Syndrome,"extreme fatigue,post-exertional malaise,sleep problems,cognitive difficulties,muscle pain,joint pain,headaches,sore throat",moderate,General,G93.3
+Dehydration,"extreme thirst,dry mouth,dark urine,dizziness,fatigue,headache,dry skin,decreased urine output,confusion",moderate,General,E86.0
+Heat Stroke,"very high body temperature,hot dry skin,rapid pulse,confusion,loss of consciousness,nausea,severe headache,no sweating",critical,General,T67.0
+Sepsis,"high fever or low temperature,rapid heart rate,rapid breathing,confusion,extreme pain,clammy skin,low blood pressure",critical,Infectious,A41.9
+Hypothermia,"shivering,slurred speech,slow breathing,weak pulse,confusion,drowsiness,low body temperature,clumsiness",critical,General,T68
