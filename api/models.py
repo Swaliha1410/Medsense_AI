@@ -76,6 +76,8 @@ class ChatMessage(models.Model):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    # session_id groups messages into conversations; blank = legacy messages
+    session_id = models.CharField(max_length=64, blank=True, default='', db_index=True)
 
     class Meta:
         ordering = ['timestamp']

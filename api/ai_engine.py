@@ -7,8 +7,16 @@ Loads all CSVs at startup and uses them for:
   1. symptom_analysis(symptoms, age, severity, duration, conditions, meds)
   2. chat_response(message, conversation_history)
   3. analyze_report_text(text)
-  4. lookup_medicine(query)          — NEW: medicine details + side-effects
-  5. lookup_medicine_price(query)    — NEW: pricing from A-Z India dataset
+  4. lookup_medicine(query)          — medicine details + side-effects
+  5. lookup_medicine_price(query)    — pricing from A-Z India dataset
+
+XGBoost integration:
+  Trained models in api/ml_models/ are loaded by ml_inference.py.
+  When available they augment/override the rule-based logic:
+    - symptom_analysis   → XGBoost disease probabilities merged with TF-IDF scores
+    - analyze_report_text → XGBoost status classifier replaces threshold rules
+    - chat_response       → XGBoost intent classifier replaces regex patterns
+  Run  python api/ml_trainer.py  once to generate model files.
 """
 
 import csv
@@ -18,6 +26,22 @@ import math
 import logging
 from pathlib import Path
 from typing import Any
+
+# ── XGBoost inference (graceful import — falls back if models not trained yet)
+try:
+    from api.ml_inference import predict_diseases, predict_report_status, predict_intent, models_ready
+    _ML_AVAILABLE = True
+except ImportError:
+    try:
+        # Fallback import path when running directly inside the api/ dir
+        from ml_inference import predict_diseases, predict_report_status, predict_intent, models_ready
+        _ML_AVAILABLE = True
+    except ImportError:
+        _ML_AVAILABLE = False
+        def predict_diseases(*a, **kw): return None      # noqa: E301
+        def predict_report_status(*a, **kw): return None  # noqa: E301
+        def predict_intent(*a, **kw): return None          # noqa: E301
+        def models_ready(): return False                   # noqa: E301
 
 logger = logging.getLogger(__name__)
 
@@ -281,6 +305,7 @@ def compute_model_accuracy() -> dict[str, Any]:
         "report_analysis_accuracy":report_pct,
         "chat_intent_accuracy":    chat_pct,
         "disease_coverage":        coverage_pct,
+        "xgboost_models_active":   models_ready(),
         "dataset_stats": {
             "symptom_diseases":    len(_symptom_db),
             "treatment_diseases":  len(_treatment_db),
@@ -487,6 +512,36 @@ def symptom_analysis(
             scored.append((weighted, row))
 
     scored.sort(key=lambda x: x[0], reverse=True)
+
+    # ── XGBoost augmentation ──────────────────────────────────────────────────
+    # If trained models are available, blend XGBoost probabilities into the
+    # CSV-based scores (weighted average: 60 % XGBoost + 40 % rule-based).
+    xgb_preds = predict_diseases(symptoms, top_k=10)
+    if xgb_preds:
+        # Build a lookup: disease name (lower) → xgb confidence
+        xgb_conf = {p["disease"].lower(): p["confidence"] for p in xgb_preds}
+        # Re-score: replace score with blended value where XGBoost has opinion
+        blended: list[tuple[float, dict]] = []
+        for rule_score, row in scored:
+            d_lower = row["disease"].lower()
+            xgb_score = xgb_conf.get(d_lower, 0.0)
+            # Normalise rule score to [0,1] roughly (cap at 2.0)
+            norm_rule = min(rule_score / 2.0, 1.0)
+            blend = 0.60 * xgb_score + 0.40 * norm_rule
+            blended.append((blend, row))
+        # Also add XGBoost-only hits not already in CSV results
+        csv_diseases = {row["disease"].lower() for _, row in scored}
+        for p in xgb_preds:
+            d_lower = p["disease"].lower()
+            if d_lower not in csv_diseases:
+                # Find matching row in symptom_db
+                for row in _symptom_db:
+                    if row["disease"].lower() == d_lower:
+                        blended.append((0.60 * p["confidence"], row))
+                        break
+        blended.sort(key=lambda x: x[0], reverse=True)
+        scored = blended
+
     top = scored[:5]  # top 5 matches
 
     if not top:
@@ -577,29 +632,67 @@ def symptom_analysis(
 
     guidance = " ".join(guidance_parts)
 
-    # ── Build recommendations from treatment data ─────────────────────────────
+    # ── Build prescriptions and treatment data — 100% from datasets ─────────
     recommendations: list[str] = []
     treatments_out: list[dict] = []
 
     for _, row in top[:3]:
         tx = _get_treatment(row["disease"])
-        if tx:
-            treatments_out.append({
-                "disease":         row["disease"],
-                "first_line":      tx.get("first_line_treatment", ""),
-                "medications":     tx.get("medications", ""),
-                "home_remedies":   tx.get("home_remedies", ""),
-                "lifestyle":       tx.get("lifestyle_changes", ""),
-                "specialist":      tx.get("specialist", ""),
-                "prognosis":       tx.get("prognosis", ""),
-                "duration":        tx.get("duration", ""),
-                "emergency_signs": tx.get("emergency_signs", ""),
-            })
-            # pull home remedies into recommendations
-            for rem in tx.get("home_remedies", "").split(","):
-                r = rem.strip()
-                if r and r not in recommendations:
-                    recommendations.append(r)
+        if not tx:
+            continue
+
+        # ── Parse medications from diseases_treatments.csv and enrich each ──
+        raw_meds_str = tx.get("medications", "")
+        structured_medications: list[dict] = []
+        for med_entry in raw_meds_str.split(","):
+            med_name = med_entry.strip()
+            if not med_name:
+                continue
+            # Look up full details from medicine_details.csv + az_medicines.csv
+            med_info = lookup_medicine(med_name)
+            if med_info.get("found"):
+                structured_medications.append({
+                    "name":         med_info["name"],
+                    "composition":  med_info.get("composition", ""),
+                    "uses":         med_info.get("uses", ""),
+                    "side_effects": med_info.get("side_effects", ""),
+                    "manufacturer": med_info.get("manufacturer", ""),
+                    "price_inr":    med_info.get("az_price", ""),
+                    "rating":       med_info.get("rating_summary", ""),
+                })
+            else:
+                # Still include the medication name even if not in medicine DB
+                structured_medications.append({
+                    "name":         med_name,
+                    "composition":  "",
+                    "uses":         "",
+                    "side_effects": "",
+                    "manufacturer": "",
+                    "price_inr":    "",
+                    "rating":       "",
+                })
+
+        treatments_out.append({
+            "disease":              row["disease"],
+            "category":             row.get("category", ""),
+            "icd_code":             row.get("icd_code", ""),
+            "severity":             row.get("severity", ""),
+            "first_line":           tx.get("first_line_treatment", ""),
+            "medications":          tx.get("medications", ""),          # raw string
+            "medications_detail":   structured_medications,             # enriched list
+            "home_remedies":        tx.get("home_remedies", ""),
+            "lifestyle":            tx.get("lifestyle_changes", ""),
+            "specialist":           tx.get("specialist", ""),
+            "prognosis":            tx.get("prognosis", ""),
+            "duration":             tx.get("duration", ""),
+            "emergency_signs":      tx.get("emergency_signs", ""),
+        })
+
+        # Pull home remedies into top-level recommendations
+        for rem in tx.get("home_remedies", "").split(","):
+            r = rem.strip()
+            if r and r not in recommendations:
+                recommendations.append(r)
 
     # Always add universal recommendations
     universal = [
@@ -661,6 +754,14 @@ def symptom_analysis(
             "icd_code": primary_row.get("icd_code", ""),
             "score":    round(primary_score, 3),
         },
+        "ai_source": {
+            "xgboost_active":   models_ready(),
+            "datasets_used":    ["symptoms_diseases.csv", "diseases_treatments.csv",
+                                 "medicine_details.csv", "az_medicines.csv"],
+            "disease_db_size":  len(_symptom_db),
+            "treatment_db_size":len(_treatment_db),
+            "medicine_db_size": len(_medicine_list),
+        },
         "disclaimer": (
             "This AI-generated analysis is for informational purposes only and does not "
             "constitute a medical diagnosis. Always consult a qualified healthcare professional."
@@ -695,7 +796,8 @@ def _extract_value(text: str) -> float | None:
 
 
 def _interpret_value(row: dict, value: float) -> str:
-    """Return 'low', 'normal', 'high', or 'critical_low'/'critical_high'."""
+    """Return 'low', 'normal', 'high', or 'critical_low'/'critical_high'.
+    Uses XGBoost report model when available; falls back to threshold rules."""
     def _num(key: str) -> float | None:
         raw = row.get(key, "").replace("N/A", "").strip()
         if not raw:
@@ -722,6 +824,12 @@ def _interpret_value(row: dict, value: float) -> str:
     elif lt_match:
         high_normal = float(lt_match.group(1))
 
+    # ── XGBoost path ──────────────────────────────────────────────────────────
+    xgb_status = predict_report_status(value, low_normal, high_normal, crit_low, crit_high)
+    if xgb_status is not None:
+        return xgb_status
+
+    # ── Rule-based fallback ────────────────────────────────────────────────────
     if crit_low is not None and value < crit_low:
         return "critical_low"
     if crit_high is not None and value > crit_high:
@@ -816,6 +924,53 @@ def analyze_report_text(report_text: str) -> dict[str, Any]:
         else:
             finding["interpretation"] = "Within normal range"
             finding["advice"]         = "No action required — maintain healthy habits"
+
+        # ── Dataset-sourced treatment suggestion for abnormal findings ────────
+        # Map common lab parameters to conditions in diseases_treatments.csv
+        _PARAM_TO_DISEASE: dict[str, str] = {
+            "hemoglobin": "Anemia",
+            "hba1c":      "Type 2 Diabetes",
+            "hba1c (glycated hemoglobin)": "Type 2 Diabetes",
+            "fasting blood glucose": "Type 2 Diabetes",
+            "total cholesterol": "Hypertension",
+            "ldl":        "Hypertension",
+            "triglycerides": "Hypertension",
+            "tsh":        "Hypothyroidism",
+            "tsh (thyroid stimulating hormone)": "Hypothyroidism",
+            "t4":         "Hypothyroidism",
+            "serum creatinine": "Chronic Kidney Disease",
+            "urea":       "Chronic Kidney Disease",
+            "uric acid":  "Gout",
+            "serum uric acid": "Gout",
+            "vitamin d":  "Vitamin D Deficiency",
+            "vitamin d (25-oh)": "Vitamin D Deficiency",
+            "vitamin b12": "Anemia",
+            "ferritin":   "Anemia",
+            "iron":       "Anemia",
+            "wbc":        "Common Cold",
+            "wbc (white blood cells)": "Common Cold",
+            "platelet":   "Dengue Fever",
+            "alt":        "Hepatitis A",
+            "ast":        "Hepatitis A",
+            "bilirubin":  "Hepatitis A",
+            "serum sodium": "Dehydration",
+            "serum potassium": "Dehydration",
+            "calcium":    "Osteoporosis",
+        }
+        if status not in ("normal",):
+            param_lower = canonical_name.lower()
+            mapped_disease = _PARAM_TO_DISEASE.get(param_lower)
+            if mapped_disease:
+                tx = _get_treatment(mapped_disease)
+                if tx:
+                    finding["related_disease"]   = mapped_disease
+                    finding["treatment_guidance"] = {
+                        "first_line":     tx.get("first_line_treatment", ""),
+                        "medications":    tx.get("medications", ""),
+                        "home_remedies":  tx.get("home_remedies", ""),
+                        "lifestyle":      tx.get("lifestyle_changes", ""),
+                        "specialist":     tx.get("specialist", ""),
+                    }
 
         findings.append(finding)
 
@@ -1002,6 +1157,16 @@ _INTENT_PATTERNS: list[tuple[re.Pattern, str]] = [
 
 
 def _detect_intent(message: str) -> str:
+    # ── XGBoost path ──────────────────────────────────────────────────────────
+    xgb_intent = predict_intent(message)
+    if xgb_intent is not None:
+        # Always trust the regex for emergency — safety critical
+        for pattern, intent in _INTENT_PATTERNS:
+            if intent == 'emergency' and pattern.search(message):
+                return 'emergency'
+        return xgb_intent
+
+    # ── Regex fallback ────────────────────────────────────────────────────────
     for pattern, intent in _INTENT_PATTERNS:
         if pattern.search(message):
             return intent

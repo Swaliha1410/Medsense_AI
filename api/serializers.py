@@ -103,7 +103,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class ChatMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatMessage
-        fields = ['id', 'role', 'content', 'timestamp']
+        fields = ['id', 'role', 'content', 'timestamp', 'session_id']
         read_only_fields = ['timestamp']
 
 

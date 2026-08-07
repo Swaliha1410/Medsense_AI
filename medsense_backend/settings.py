@@ -1,8 +1,19 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-+ogt9b@t!_zdin^(-o3t4$1$=#xv^r1h-twk!1yo52w=1x(=@7'
+# Load .env file if present (local development)
+_env_file = BASE_DIR / '.env'
+if _env_file.exists():
+    with open(_env_file) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _key, _, _val = _line.partition('=')
+                os.environ.setdefault(_key.strip(), _val.strip())
+
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
 
 DEBUG = True
 
@@ -125,19 +136,19 @@ EMAIL_HOST           = 'smtp.gmail.com'
 EMAIL_PORT           = 465          # SSL — avoids Gmail self-send deduplication bug
 EMAIL_USE_SSL        = True
 EMAIL_USE_TLS        = False        # TLS and SSL are mutually exclusive
-EMAIL_HOST_USER      = 'sahilkatariya132@gmail.com'
-EMAIL_HOST_PASSWORD  = 'pgqhfsjwrnmmxmmy'
-DEFAULT_FROM_EMAIL   = 'MedSense <sahilkatariya132@gmail.com>'
+EMAIL_HOST_USER      = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD  = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL   = os.environ.get('DEFAULT_FROM_EMAIL', 'MedSense')
 
 PASSWORD_RESET_TIMEOUT_MINUTES = 30
 
 # ── SMS via Fast2SMS ──────────────────────────────────────────────────────────
 # Sign up free at https://www.fast2sms.com → Dev API → copy your API key
 # Works directly with Indian numbers — no carrier gateway needed.
-FAST2SMS_API_KEY  = 'jzg8baytGdnDL9u1E3Cw7JTroSOHxiMQRhs2APKpcYFNfWBq0Iyr5zcwT2SM73pfGAjPKNZiX8eFxmgO'
-CALLMEBOT_API_KEY = 'YOUR_CALLMEBOT_API_KEY'
-TEXTBEE_API_KEY   = 'txb_rbQCfc6WqKoJLLHsPkcrLVelYtCvJPHg'
-TEXTBEE_DEVICE_ID = '6a736789f83fbea629a60a35'
+FAST2SMS_API_KEY  = os.environ.get('FAST2SMS_API_KEY', '')
+CALLMEBOT_API_KEY = os.environ.get('CALLMEBOT_API_KEY', '')
+TEXTBEE_API_KEY   = os.environ.get('TEXTBEE_API_KEY', '')
+TEXTBEE_DEVICE_ID = os.environ.get('TEXTBEE_DEVICE_ID', '')
 
 # How many minutes PAST reminder_time before the overdue SMS fires
 MEDICINE_SMS_GRACE_MINUTES  = 5

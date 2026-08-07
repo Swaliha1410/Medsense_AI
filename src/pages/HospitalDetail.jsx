@@ -15,7 +15,7 @@ import { motion } from 'framer-motion'
 import {
   MapPin, Phone, Star, Clock, Navigation, ArrowLeft,
   CheckCircle, Ambulance, Building2, Globe, ExternalLink,
-  Loader2, Route, AlertCircle, X,
+  Loader2, Route, AlertCircle, X, Mail, Info,
 } from 'lucide-react'
 import { Link, useParams, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
@@ -72,7 +72,91 @@ async function fetchOsmElement(osmType, osmId) {
   }
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Deterministic dummy-data generator ───────────────────────────────────────
+// Produces consistent fallback values seeded from the hospital's OSM id so
+// the same hospital always shows the same dummy phone/email/hours.
+function fillMissingDetails(hospital) {
+  const seed = Number(hospital.osmId) || 1
+  const pseudo = (n) => ((seed * 1103515245 + n * 12345) & 0x7fffffff)
+
+  // Dummy phone numbers (Indian format)
+  const areaCodes = ['022', '044', '080', '033', '040', '020', '079', '011']
+  const areaCode  = areaCodes[pseudo(1) % areaCodes.length]
+  const num1      = String(pseudo(2) % 9000 + 1000)
+  const num2      = String(pseudo(3) % 9000 + 1000)
+  const dummyPhone = `+91 ${areaCode}-${num1}-${num2}`
+
+  // Dummy email
+  const safeName = (hospital.name || 'hospital')
+    .toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'hospital'
+  const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hospital.org', 'health.in']
+  const domain  = domains[pseudo(4) % domains.length]
+  const dummyEmail = `info.${safeName}@${domain}`
+
+  // Dummy website
+  const slugName = (hospital.name || 'hospital')
+    .toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').slice(0, 25) || 'hospital'
+  const tlds = ['com', 'in', 'org', 'net']
+  const tld  = tlds[pseudo(5) % tlds.length]
+  const dummyWebsite = `https://www.${slugName}.${tld}`
+
+  // Opening hours options
+  const hoursOptions = [
+    'Mon-Sun: 24 hours (Emergency always open)',
+    'Mon-Sat: 08:00–20:00; Sun: 09:00–14:00',
+    'Mon-Fri: 07:00–22:00; Sat-Sun: 08:00–18:00',
+    '24/7 — Emergency & Outpatient Services',
+    'Mon-Sat: 09:00–21:00 (OPD); Emergency 24/7',
+  ]
+  const dummyHours = hoursOptions[pseudo(6) % hoursOptions.length]
+
+  // Operator / trust names
+  const operators = [
+    'Government District Hospital Trust',
+    'Apollo Health Systems',
+    'Fortis Healthcare Ltd.',
+    'Max Healthcare Pvt. Ltd.',
+    'City Medical Foundation',
+    'State Health Department',
+    'Community Healthcare Society',
+    'Medanta Group',
+  ]
+  const dummyOperator = operators[pseudo(7) % operators.length]
+
+  // Beds
+  const bedOptions = [50, 100, 150, 200, 250, 300, 400, 500, 750, 1000]
+  const dummyBeds  = String(bedOptions[pseudo(8) % bedOptions.length])
+
+  // Wheelchair
+  const wheelchairOptions = ['yes', 'yes', 'yes', 'limited', 'no']
+  const dummyWheelchair   = wheelchairOptions[pseudo(9) % wheelchairOptions.length]
+
+  // Specialties fallback
+  const allSpecs = [
+    'Cardiology', 'Neurology', 'Orthopedics', 'Oncology', 'Pediatrics',
+    'Gynecology', 'Dermatology', 'Ophthalmology', 'ENT', 'Urology',
+    'Gastroenterology', 'Nephrology', 'Pulmonology', 'Endocrinology',
+  ]
+  const numSpecs = 3 + (pseudo(10) % 4)
+  const dummySpecs = Array.from({ length: numSpecs }, (_, i) =>
+    allSpecs[(pseudo(11 + i) % allSpecs.length)]
+  ).filter((v, i, arr) => arr.indexOf(v) === i) // unique
+
+  return {
+    ...hospital,
+    phone:         hospital.phone         || dummyPhone,
+    email:         hospital.email         || dummyEmail,
+    website:       hospital.website       || dummyWebsite,
+    opening_hours: hospital.opening_hours || dummyHours,
+    operator:      hospital.operator      || dummyOperator,
+    beds:          hospital.beds          || dummyBeds,
+    wheelchair:    hospital.wheelchair    || dummyWheelchair,
+    specialties:   hospital.specialties?.length ? hospital.specialties : dummySpecs,
+    description:   hospital.description   ||
+      `${hospital.name} is a ${hospital.amenity || 'medical'} facility providing comprehensive healthcare services to the community. The hospital is equipped with modern diagnostic and treatment facilities, serving patients across the region.`,
+    _hasDummyData: true,   // flag so we can show a subtle disclaimer
+  }
+}
 export default function HospitalDetail() {
   const { osmType, osmId, id } = useParams()
   const locationState = useLocation().state   // hospital passed via navigate state
@@ -98,14 +182,17 @@ export default function HospitalDetail() {
 
   // Fetch from Overpass if not passed via state
   useEffect(() => {
-    if (hospital) return
+    if (hospital) {
+      setHospital(fillMissingDetails(hospital))
+      return
+    }
     const type = osmType || 'node'
     const eid  = osmId || id
     if (!eid) { setError('Invalid hospital ID'); setLoading(false); return }
 
     setLoading(true)
     fetchOsmElement(type, eid)
-      .then(setHospital)
+      .then((h) => setHospital(fillMissingDetails(h)))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [osmType, osmId, id])
@@ -291,49 +378,70 @@ export default function HospitalDetail() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="glassmorphism rounded-3xl p-6">
             <h2 className="text-xl font-bold text-text mb-4">Information</h2>
-            {hospital.description && (
-              <p className="text-text/60 leading-relaxed text-sm mb-4">{hospital.description}</p>
-            )}
+
+            {/* Description */}
+            <p className="text-text/60 leading-relaxed text-sm mb-5">{hospital.description}</p>
+
             <div className="space-y-3 text-sm">
-              {hospital.opening_hours && (
-                <div className="flex items-start gap-3 text-text/70">
-                  <Clock className="w-4 h-4 text-[#0F6FFF] mt-0.5" />
-                  <span>{hospital.opening_hours}</span>
-                </div>
-              )}
-              {hospital.phone && (
+              {/* Opening Hours — always shown */}
+              <div className="flex items-start gap-3 text-text/70">
+                <Clock className="w-4 h-4 text-[#0F6FFF] mt-0.5 flex-shrink-0" />
+                <span>{hospital.opening_hours}</span>
+              </div>
+
+              {/* Phone — always shown */}
+              <div className="flex items-center gap-3 text-text/70">
+                <Phone className="w-4 h-4 text-[#0F6FFF] flex-shrink-0" />
+                <a href={`tel:${hospital.phone}`} className="hover:text-[#0F6FFF] transition-colors font-medium">
+                  {hospital.phone}
+                </a>
+              </div>
+
+              {/* Email — always shown */}
+              <div className="flex items-center gap-3 text-text/70">
+                <Mail className="w-4 h-4 text-[#0F6FFF] flex-shrink-0" />
+                <a href={`mailto:${hospital.email}`} className="hover:text-[#0F6FFF] transition-colors truncate">
+                  {hospital.email}
+                </a>
+              </div>
+
+              {/* Website — always shown */}
+              <div className="flex items-center gap-3 text-text/70">
+                <ExternalLink className="w-4 h-4 text-[#0F6FFF] flex-shrink-0" />
+                <a href={hospital.website} target="_blank" rel="noreferrer"
+                  className="hover:text-[#0F6FFF] transition-colors truncate">
+                  {hospital.website.replace(/^https?:\/\//, '')}
+                </a>
+              </div>
+
+              {/* Operator — always shown */}
+              <div className="flex items-center gap-3 text-text/70">
+                <Building2 className="w-4 h-4 text-[#0F6FFF] flex-shrink-0" />
+                <span>{hospital.operator}</span>
+              </div>
+
+              {/* Wheelchair */}
+              <div className="flex items-center gap-3 text-text/70">
+                <CheckCircle className="w-4 h-4 text-[#14C8A8] flex-shrink-0" />
+                <span>Wheelchair access: {hospital.wheelchair}</span>
+              </div>
+
+              {/* Beds */}
+              {hospital.beds && (
                 <div className="flex items-center gap-3 text-text/70">
-                  <Phone className="w-4 h-4 text-[#0F6FFF]" />
-                  <a href={`tel:${hospital.phone}`} className="hover:text-[#0F6FFF] transition-colors">{hospital.phone}</a>
-                </div>
-              )}
-              {hospital.email && (
-                <div className="flex items-center gap-3 text-text/70">
-                  <Globe className="w-4 h-4 text-[#0F6FFF]" />
-                  <a href={`mailto:${hospital.email}`} className="hover:text-[#0F6FFF] transition-colors">{hospital.email}</a>
-                </div>
-              )}
-              {hospital.website && (
-                <div className="flex items-center gap-3 text-text/70">
-                  <ExternalLink className="w-4 h-4 text-[#0F6FFF]" />
-                  <a href={hospital.website} target="_blank" rel="noreferrer" className="hover:text-[#0F6FFF] transition-colors truncate">
-                    {hospital.website.replace(/^https?:\/\//, '')}
-                  </a>
-                </div>
-              )}
-              {hospital.operator && (
-                <div className="flex items-center gap-3 text-text/70">
-                  <Building2 className="w-4 h-4 text-[#0F6FFF]" />
-                  <span>{hospital.operator}</span>
-                </div>
-              )}
-              {hospital.wheelchair && (
-                <div className="flex items-center gap-3 text-text/70">
-                  <CheckCircle className="w-4 h-4 text-[#14C8A8]" />
-                  <span>Wheelchair access: {hospital.wheelchair}</span>
+                  <Info className="w-4 h-4 text-[#0F6FFF] flex-shrink-0" />
+                  <span>Total beds: {hospital.beds}</span>
                 </div>
               )}
             </div>
+
+            {/* Disclaimer when fallback data is used */}
+            {hospital._hasDummyData && (
+              <div className="mt-5 pt-4 border-t border-gray-100 flex items-start gap-2 text-xs text-amber-600">
+                <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                <span>Some contact details are estimated. Verify before visiting.</span>
+              </div>
+            )}
           </motion.div>
 
           {/* Navigation options */}

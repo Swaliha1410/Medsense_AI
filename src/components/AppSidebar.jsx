@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
   LayoutDashboard, MessageSquare, Activity, FileText, 
-  Pill, MapPin, User, Settings, LogOut 
+  Pill, MapPin, User, Settings, LogOut, Clock
 } from 'lucide-react'
 import Logo from './Logo'
 import { useAuth } from '../context/AuthContext'
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { icon: FileText, label: 'Medical Reports', path: '/reports' },
   { icon: Pill, label: 'Medicines', path: '/medicines' },
   { icon: MapPin, label: 'Hospital Finder', path: '/hospitals' },
+  { icon: Clock, label: 'Chat History', path: '/chat-history' },
 ]
 
 const BOTTOM_NAV = [

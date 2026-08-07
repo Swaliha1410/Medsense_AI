@@ -32,6 +32,9 @@ urlpatterns = [
     # Contact / CTA form
     path('contact/', views.ContactInquiryCreateView.as_view(), name='contact'),
 
+    # Chat sessions list (must be before the router include)
+    path('chat/sessions/', views.chat_sessions, name='chat-sessions'),
+
     # ── AI Engine endpoints ───────────────────────────────────────────────────
     path('ai/chat/',             views.ai_chat,             name='ai-chat'),
     path('ai/analyze-symptoms/', views.ai_analyze_symptoms, name='ai-analyze-symptoms'),

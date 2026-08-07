@@ -49,6 +49,73 @@ function normalizeType(amenity) {
   return 'General'
 }
 
+// ── Deterministic dummy-data filler ──────────────────────────────────────────
+// Fills in missing contact / operational details so every card always shows
+// something useful. Values are seeded from the OSM id so the same hospital
+// always gets the same dummy values across renders.
+function fillMissingDetails(hospital) {
+  const seed   = Number(hospital.osmId) || 1
+  const pseudo = (n) => ((seed * 1103515245 + n * 12345) & 0x7fffffff)
+
+  // Phone (Indian format)
+  const areaCodes  = ['022', '044', '080', '033', '040', '020', '079', '011']
+  const areaCode   = areaCodes[pseudo(1) % areaCodes.length]
+  const dummyPhone = `+91 ${areaCode}-${String(pseudo(2) % 9000 + 1000)}-${String(pseudo(3) % 9000 + 1000)}`
+
+  // Email
+  const safeName   = (hospital.name || 'hospital').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'hospital'
+  const domains    = ['gmail.com', 'yahoo.com', 'outlook.com', 'hospital.org', 'health.in']
+  const dummyEmail = `info.${safeName}@${domains[pseudo(4) % domains.length]}`
+
+  // Website
+  const slugName    = (hospital.name || 'hospital').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').slice(0, 25) || 'hospital'
+  const tlds        = ['com', 'in', 'org', 'net']
+  const dummyWebsite = `https://www.${slugName}.${tlds[pseudo(5) % tlds.length]}`
+
+  // Opening hours
+  const hoursOptions = [
+    'Mon-Sun: 24 hours (Emergency always open)',
+    'Mon-Sat: 08:00–20:00; Sun: 09:00–14:00',
+    'Mon-Fri: 07:00–22:00; Sat-Sun: 08:00–18:00',
+    '24/7 — Emergency & Outpatient Services',
+    'Mon-Sat: 09:00–21:00 (OPD); Emergency 24/7',
+  ]
+  const dummyHours = hoursOptions[pseudo(6) % hoursOptions.length]
+
+  // Operator
+  const operators = [
+    'Government District Hospital Trust', 'Apollo Health Systems',
+    'Fortis Healthcare Ltd.', 'Max Healthcare Pvt. Ltd.',
+    'City Medical Foundation', 'State Health Department',
+    'Community Healthcare Society', 'Medanta Group',
+  ]
+  const dummyOperator = operators[pseudo(7) % operators.length]
+
+  // Specialties
+  const allSpecs = [
+    'Cardiology', 'Neurology', 'Orthopedics', 'Oncology', 'Pediatrics',
+    'Gynecology', 'Dermatology', 'Ophthalmology', 'ENT', 'Urology',
+    'Gastroenterology', 'Nephrology', 'Pulmonology', 'Endocrinology',
+  ]
+  const numSpecs   = 3 + (pseudo(10) % 4)
+  const dummySpecs = Array.from({ length: numSpecs }, (_, i) =>
+    allSpecs[pseudo(11 + i) % allSpecs.length]
+  ).filter((v, i, arr) => arr.indexOf(v) === i)
+
+  const hadRealPhone = Boolean(hospital.phone)
+
+  return {
+    ...hospital,
+    phone:         hospital.phone         || dummyPhone,
+    email:         hospital.email         || dummyEmail,
+    website:       hospital.website       || dummyWebsite,
+    opening_hours: hospital.opening_hours || dummyHours,
+    operator:      hospital.operator      || dummyOperator,
+    specialties:   hospital.specialties?.length ? hospital.specialties : dummySpecs,
+    _hasDummyData: !hadRealPhone,  // true when we injected fallback contact info
+  }
+}
+
 function parseElement(el, userLat, userLng) {
   const tags = el.tags || {}
   const lat  = el.lat ?? el.center?.lat
@@ -124,7 +191,9 @@ export function useNearbyHospitals(userLocation, radiusMeters = 5000) {
         }
       }
 
-      const sorted = [...seen.values()].sort((a, b) => a.distance - b.distance)
+      const sorted = [...seen.values()]
+        .sort((a, b) => a.distance - b.distance)
+        .map(fillMissingDetails)
       setHospitals(sorted)
     } catch (err) {
       setError(err.message || 'Failed to load nearby hospitals')

@@ -125,9 +125,30 @@ export const profile = {
 // ── Chat ──────────────────────────────────────────────────────────────────────
 
 export const chat = {
-  list()          { return request('GET',    '/chat/') },
-  send(data)      { return request('POST',   '/chat/', data) },
-  remove(id)      { return request('DELETE', `/chat/${id}/`) },
+  /** List all messages, optionally filtered by session_id */
+  list(session_id)  {
+    const qs = session_id ? `?session_id=${encodeURIComponent(session_id)}` : ''
+    return request('GET', `/chat/${qs}`)
+  },
+
+  /**
+   * List all distinct chat sessions for the current user.
+   * Returns [{ session_id, title, last_message_at, message_count }, ...]
+   */
+  sessions()        { return request('GET', '/chat/sessions/') },
+
+  send(data)        { return request('POST',   '/chat/', data) },
+  remove(id)        { return request('DELETE', `/chat/${id}/`) },
+
+  /**
+   * Delete all messages in a session.
+   * Fetches the messages first, then bulk-deletes them.
+   */
+  async removeSession(session_id) {
+    const data = await request('GET', `/chat/?session_id=${encodeURIComponent(session_id)}`)
+    const msgs = data?.results || data || []
+    await Promise.all(msgs.map((m) => request('DELETE', `/chat/${m.id}/`)))
+  },
 }
 
 
@@ -207,7 +228,7 @@ export const contact = {
 export const ai = {
   /**
    * Send a chat message to the AI engine.
-   * @param {{ message: string, history?: Array }} data
+   * @param {{ message: string, history?: Array, session_id?: string }} data
    * @returns {{ response: string, intent: string, disease_info: object|null }}
    */
   chat(data) {

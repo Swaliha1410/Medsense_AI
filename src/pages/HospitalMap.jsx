@@ -4,6 +4,7 @@ import {
   MapPin, Search, Phone, Star, Clock, Navigation,
   X, Loader2, RefreshCw, Globe, ExternalLink,
   AlertCircle, ChevronRight, Route, CheckCircle2,
+  Mail, Building2, Info,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
@@ -218,11 +219,11 @@ export default function HospitalMap() {
 
               {/* Filter Pills */}
               <div className="flex items-center gap-2 flex-wrap">
-                {/* Recommended - Active */}
+                {/* Recommended */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSortBy('recommended')}
+                  onClick={() => { setSortBy('recommended'); setFilter('All') }}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all ${
                     sortBy === 'recommended'
                       ? 'bg-gradient-to-r from-[#0F6FFF] to-[#14C8A8] text-white'
@@ -233,11 +234,11 @@ export default function HospitalMap() {
                   <span>Recommended</span>
                 </motion.button>
 
-                {/* Other Filter Buttons */}
+                {/* Nearest */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSortBy('nearest')}
+                  onClick={() => { setSortBy('nearest'); setFilter('All') }}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow-md ${
                     sortBy === 'nearest'
                       ? 'bg-gradient-to-r from-[#0F6FFF] to-[#14C8A8] text-white'
@@ -248,10 +249,11 @@ export default function HospitalMap() {
                   <span>Nearest</span>
                 </motion.button>
 
+                {/* Top Rated */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSortBy('topRated')}
+                  onClick={() => { setSortBy('topRated'); setFilter('All') }}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow-md ${
                     sortBy === 'topRated'
                       ? 'bg-gradient-to-r from-[#0F6FFF] to-[#14C8A8] text-white'
@@ -262,30 +264,28 @@ export default function HospitalMap() {
                   <span>Top Rated</span>
                 </motion.button>
 
+                {/* Emergency — filters AND sorts emergency hospitals */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSortBy('emergency')}
+                  onClick={() => {
+                    if (sortBy === 'emergency' && filter === 'Emergency') {
+                      // toggle off — go back to recommended/all
+                      setSortBy('recommended')
+                      setFilter('All')
+                    } else {
+                      setSortBy('emergency')
+                      setFilter('Emergency')
+                    }
+                  }}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow-md ${
-                    sortBy === 'emergency'
+                    sortBy === 'emergency' && filter === 'Emergency'
                       ? 'bg-gradient-to-r from-[#0F6FFF] to-[#14C8A8] text-white'
                       : 'bg-white border border-[#E2E8F0] text-[#64748B] hover:border-[#0F6FFF] hover:text-[#0F6FFF]'
                   }`}
                 >
                   <AlertCircle className="w-4 h-4" />
                   <span>Emergency</span>
-                </motion.button>
-
-                {/* More Filters */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E2E8F0] hover:border-[#0F6FFF] hover:bg-[#F8FAFC] rounded-full text-sm font-medium text-[#64748B] hover:text-[#0F6FFF] transition-all shadow-sm hover:shadow-md"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                  </svg>
-                  <span>More Filters</span>
                 </motion.button>
               </div>
             </motion.div>
@@ -476,16 +476,30 @@ export default function HospitalMap() {
                         )}
                       </div>
 
+                      {/* Phone & Hours Row */}
+                      <div className="flex items-center gap-3 text-xs mb-2 flex-wrap">
+                        <span className="flex items-center gap-1 text-[#0F6FFF] font-medium">
+                          <Phone className="w-3 h-3" />
+                          {h.phone}
+                        </span>
+                      </div>
+
                       {/* Status Row */}
-                      <div className="flex items-center gap-3 text-xs">
+                      <div className="flex items-center gap-3 text-xs flex-wrap">
                         <span className="flex items-center gap-1.5 text-[#14C8A8] font-medium">
                           <div className="w-2 h-2 rounded-full bg-[#14C8A8]" />
-                          Open 24/7
+                          {h.opening_hours?.includes('24') ? 'Open 24/7' : 'Open Now'}
                         </span>
                         {h.emergency && (
                           <span className="flex items-center gap-1.5 text-red-500 font-medium">
                             <AlertCircle className="w-3.5 h-3.5" />
                             Emergency Care
+                          </span>
+                        )}
+                        {h._hasDummyData && (
+                          <span className="flex items-center gap-1 text-amber-500 font-medium">
+                            <Info className="w-3 h-3" />
+                            Est. contact
                           </span>
                         )}
                       </div>
@@ -496,9 +510,9 @@ export default function HospitalMap() {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={(e) => { e.stopPropagation(); h.phone && window.open(`tel:${h.phone}`) }}
+                        onClick={(e) => { e.stopPropagation(); window.open(`tel:${h.phone}`) }}
                         className="p-2.5 bg-[#F8FAFC] hover:bg-[#0F6FFF] text-[#0F6FFF] hover:text-white rounded-xl transition-all"
-                        title="Call"
+                        title={h.phone}
                       >
                         <Phone className="w-4 h-4" />
                       </motion.button>
@@ -530,7 +544,7 @@ export default function HospitalMap() {
                 <div className="text-center py-12">
                   <p className="text-[#94A3B8] text-sm">No hospitals found matching your criteria</p>
                   <button 
-                    onClick={() => { setQuery(''); setFilter('All') }}
+                    onClick={() => { setQuery(''); setFilter('All'); setSortBy('recommended') }}
                     className="mt-3 text-[#0F6FFF] text-sm font-semibold hover:underline"
                   >
                     Clear filters
@@ -542,6 +556,7 @@ export default function HospitalMap() {
               {sortedHospitals.length > 0 && (
                 <motion.button
                   whileHover={{ x: 5 }}
+                  onClick={() => { setQuery(''); setFilter('All'); setSortBy('recommended'); setRadius(20000) }}
                   className="flex items-center justify-center gap-2 py-3 text-[#0F6FFF] font-semibold text-sm hover:gap-3 transition-all"
                 >
                   <span>View All Hospitals</span>
@@ -567,7 +582,8 @@ export default function HospitalMap() {
                 )}
                 
                 {/* Search in this area button */}
-                <button 
+                <button
+                  onClick={refetch}
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[999] bg-white shadow-lg rounded-full px-5 py-2.5 flex items-center gap-2 text-sm font-semibold text-[#0F172A] hover:shadow-xl transition-all border border-[#E2E8F0]"
                 >
                   <Search className="w-4 h-4 text-[#0F6FFF]" />
@@ -721,27 +737,67 @@ export default function HospitalMap() {
                       )}
                     </div>
 
-                    {/* Details List */}
+                    {/* Details List — always shown, dummy values filled in by hook */}
                     <div className="space-y-3 mb-5">
-                      {selected.opening_hours && (
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
-                            <Clock className="w-5 h-5 text-[#0F6FFF]" />
-                          </div>
-                          <span className="text-[#0F172A] font-medium">{selected.opening_hours}</span>
+                      {/* Opening Hours */}
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
+                          <Clock className="w-5 h-5 text-[#0F6FFF]" />
                         </div>
-                      )}
-                      {selected.phone && (
+                        <span className="text-[#0F172A] font-medium">{selected.opening_hours}</span>
+                      </div>
+
+                      {/* Phone */}
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
+                          <Phone className="w-5 h-5 text-[#0F6FFF]" />
+                        </div>
+                        <a href={`tel:${selected.phone}`} className="text-[#0F6FFF] font-medium hover:underline">
+                          {selected.phone}
+                        </a>
+                      </div>
+
+                      {/* Email */}
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
+                          <Mail className="w-5 h-5 text-[#0F6FFF]" />
+                        </div>
+                        <a href={`mailto:${selected.email}`} className="text-[#0F6FFF] font-medium hover:underline truncate">
+                          {selected.email}
+                        </a>
+                      </div>
+
+                      {/* Website */}
+                      {selected.website && (
                         <div className="flex items-center gap-3 text-sm">
                           <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
-                            <Phone className="w-5 h-5 text-[#0F6FFF]" />
+                            <Globe className="w-5 h-5 text-[#0F6FFF]" />
                           </div>
-                          <a href={`tel:${selected.phone}`} className="text-[#0F6FFF] font-medium hover:underline">
-                            {selected.phone}
+                          <a href={selected.website} target="_blank" rel="noreferrer"
+                            className="text-[#0F6FFF] font-medium hover:underline truncate">
+                            {selected.website.replace(/^https?:\/\//, '')}
                           </a>
                         </div>
                       )}
+
+                      {/* Operator */}
+                      {selected.operator && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-5 h-5 text-[#0F6FFF]" />
+                          </div>
+                          <span className="text-[#0F172A] font-medium">{selected.operator}</span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Disclaimer when fallback data is shown */}
+                    {selected._hasDummyData && (
+                      <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 mb-5">
+                        <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                        <span>Some contact details are estimated. Verify before visiting.</span>
+                      </div>
+                    )}
 
                     {/* Specialties */}
                     {selected.specialties.length > 0 && (

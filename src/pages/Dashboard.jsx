@@ -10,7 +10,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout'
 import { useAuth } from '../context/AuthContext'
-import { healthScore, medicines, reports, chat, profile } from '../services/api'
+import { healthScore, medicines, reports, chat, profile, ai as aiApi } from '../services/api'
 import AIAvatar from '../components/dashboard/AIAvatar'
 import AnimatedBackground from '../components/dashboard/AnimatedBackground'
 import FloatingHealthWidget from '../components/dashboard/FloatingHealthWidget'
@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [aiAccuracy, setAiAccuracy] = useState(null)
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -44,12 +45,14 @@ export default function Dashboard() {
       reports.list().catch(() => []),
       chat.list().catch(() => []),
       profile.get().catch(() => null),
-    ]).then(([scoreData, medsData, reportsData, chatData, profileData]) => {
+      aiApi.getAccuracy().catch(() => null),
+    ]).then(([scoreData, medsData, reportsData, chatData, profileData, accuracyData]) => {
       setScore(scoreData)
       setPendingMeds((medsData?.results || medsData || []).slice(0, 3))
       setRecentReports((reportsData?.results || reportsData || []).slice(0, 3))
       setRecentChats((chatData?.results || chatData || []).filter(m => m.role === 'user').slice(0, 3))
       setUserProfile(profileData)
+      setAiAccuracy(accuracyData)
       setLoading(false)
     })
   }, [isLoggedIn, navigate])
@@ -433,6 +436,66 @@ export default function Dashboard() {
             </div>
           </motion.div>
         </div>
+
+        {/* AI Model Accuracy Widget */}
+        {aiAccuracy && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="mb-8 bg-white rounded-2xl p-6 border border-[#E2E8F0]"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0F6FFF] to-[#14C8A8] flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#0F172A]">AI Model Performance</h3>
+                  <p className="text-xs text-[#64748B]">Live metrics from the MedSense AI engine</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 bg-[#F0FDF4] text-[#22C55E] rounded-full text-xs font-semibold">Live</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                {
+                  label: 'Overall Accuracy',
+                  value: aiAccuracy.overall_accuracy != null
+                    ? `${Math.round(aiAccuracy.overall_accuracy * 100)}%`
+                    : '—',
+                  color: 'text-[#0F6FFF]',
+                  bg: 'bg-[#F0F9FF]',
+                },
+                {
+                  label: 'Top-3 Symptom Match',
+                  value: aiAccuracy.symptom_top3_accuracy != null
+                    ? `${Math.round(aiAccuracy.symptom_top3_accuracy * 100)}%`
+                    : '—',
+                  color: 'text-[#14C8A8]',
+                  bg: 'bg-[#F0FDFA]',
+                },
+                {
+                  label: 'Diseases Covered',
+                  value: aiAccuracy.diseases_covered ?? '—',
+                  color: 'text-[#8B5CF6]',
+                  bg: 'bg-[#F5F3FF]',
+                },
+                {
+                  label: 'Symptoms Indexed',
+                  value: aiAccuracy.symptoms_indexed ?? '—',
+                  color: 'text-[#F59E0B]',
+                  bg: 'bg-[#FFFBEB]',
+                },
+              ].map((stat) => (
+                <div key={stat.label} className={`${stat.bg} rounded-xl p-4 text-center`}>
+                  <p className={`text-2xl font-bold ${stat.color} mb-1`}>{stat.value}</p>
+                  <p className="text-xs text-[#64748B] leading-tight">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Health Insight + Emergency CTA */}
         <div className="grid lg:grid-cols-2 gap-6">

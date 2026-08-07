@@ -202,17 +202,69 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class ChatMessageViewSet(viewsets.ModelViewSet):
     """
-    GET    /api/chat/        — list all messages for the current user
-    POST   /api/chat/        — save a new message
-    DELETE /api/chat/{id}/   — delete a message
+    GET    /api/chat/                      — list all messages for current user
+    GET    /api/chat/?session_id=<id>      — list messages for a specific session
+    POST   /api/chat/                      — save a new message
+    DELETE /api/chat/{id}/                 — delete a message
     """
     serializer_class = ChatMessageSerializer
 
     def get_queryset(self):
-        return ChatMessage.objects.filter(user=self.request.user)
+        qs = ChatMessage.objects.filter(user=self.request.user)
+        session_id = self.request.query_params.get('session_id')
+        if session_id is not None:
+            qs = qs.filter(session_id=session_id)
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+@api_view(['GET'])
+def chat_sessions(request):
+    """
+    GET /api/chat/sessions/
+    Returns the list of distinct chat sessions for the current user,
+    ordered by most recent. Each entry includes:
+      - session_id
+      - title  (first user message, truncated to 60 chars)
+      - last_message_at
+      - message_count
+    """
+    from django.db.models import Count, Max, Min
+
+    sessions = (
+        ChatMessage.objects
+        .filter(user=request.user)
+        .exclude(session_id='')
+        .values('session_id')
+        .annotate(
+            message_count=Count('id'),
+            last_message_at=Max('timestamp'),
+            first_at=Min('timestamp'),
+        )
+        .order_by('-last_message_at')
+    )
+
+    result = []
+    for s in sessions:
+        # Get the first user message as the session title
+        first_user_msg = (
+            ChatMessage.objects
+            .filter(user=request.user, session_id=s['session_id'], role='user')
+            .order_by('timestamp')
+            .values('content')
+            .first()
+        )
+        title = (first_user_msg['content'][:60] + '…') if first_user_msg and len(first_user_msg['content']) > 60 else (first_user_msg['content'] if first_user_msg else 'New Chat')
+        result.append({
+            'session_id': s['session_id'],
+            'title': title,
+            'last_message_at': s['last_message_at'],
+            'message_count': s['message_count'],
+        })
+
+    return Response(result)
 
 
 # ── HealthScore ───────────────────────────────────────────────────────────────
@@ -794,11 +846,12 @@ def ai_model_accuracy(request):
 def ai_chat(request):
     """
     POST /api/ai/chat/
-    Body: { "message": "...", "history": [...] }
+    Body: { "message": "...", "history": [...], "session_id": "..." }
     Returns: { "response": "...", "intent": "...", "disease_info": {...} | null }
     """
-    message = request.data.get('message', '').strip()
-    history = request.data.get('history', [])
+    message    = request.data.get('message', '').strip()
+    history    = request.data.get('history', [])
+    session_id = request.data.get('session_id', '')
 
     if not message:
         return Response(
@@ -810,8 +863,14 @@ def ai_chat(request):
 
     # Persist both messages to DB if user is authenticated
     if request.user and request.user.is_authenticated:
-        ChatMessage.objects.create(user=request.user, role='user',    content=message)
-        ChatMessage.objects.create(user=request.user, role='assistant', content=result['response'])
+        ChatMessage.objects.create(
+            user=request.user, role='user',
+            content=message, session_id=session_id
+        )
+        ChatMessage.objects.create(
+            user=request.user, role='assistant',
+            content=result['response'], session_id=session_id
+        )
 
     return Response(result, status=status.HTTP_200_OK)
 
